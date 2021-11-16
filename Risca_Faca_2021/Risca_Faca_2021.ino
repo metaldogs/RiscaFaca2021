@@ -1,3 +1,5 @@
+#include <IRremote.h>
+
 #include <ESP32Servo.h>
 #include <analogWrite.h>
 #include <ESP32Tone.h>
@@ -10,11 +12,23 @@
 #define leftMotorPin 25
 #define rightMotorPin 26
 
+#define irReceiverPin 15
+
+IRrecv irrecv(irReceiverPin);
+
+decode_results results;
+
 enum robotStates {
   LOCKED, AUTO, MANUAL
 };
 
+enum autoStates {
+  STOPPED, READY, RUNNING
+};
+
 robotStates robotState = LOCKED;
+
+autoStates autoState = STOPPED;
 bool optionPressed = false;
 
 Servo MotorEsquerdo;
@@ -23,13 +37,16 @@ Servo MotorDireito;
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
+
+  irrecv.enableIRIn();
+
   PS4.begin("70:77:81:d5:f8:42");
 
   while (!PS4.isConnected()) {
     Serial.println("WatingConnection");
     delay(250);
   }
-  
+
   PS4.setLed(100, 0, 0);
   PS4.sendToController();
 
@@ -37,7 +54,7 @@ void setup() {
   MotorDireito.attach(rightMotorPin);
   MotorEsquerdo.write(90);
   MotorDireito.write(90);
-  
+
   Serial.println("Ready and LOCKED");
 
 }
@@ -80,15 +97,47 @@ void Status_Verify() {
 
   if (robotState == MANUAL) {
     ManualControl();
+  } else if (robotState == AUTO) {
+    Auto();
   }
 }
+
+void Auto() {
+
+  String value;
+  if (irrecv.decode(&results))
+  {
+    value = String(results.value, HEX);
+    Serial.println(value);
+    irrecv.resume();
+  }
+
+  if (value == "ffa25d") {
+    if (autoState == STOPPED) {
+      Serial.println("ReadyToGo");
+      autoState = READY;
+    }
+  } else if (value == "ff629d") {
+    if (autoState == READY) {
+      autoState = RUNNING;
+      Serial.println("LET'S GO!!!");
+    }
+  } else if ( value == "ffe21d") {
+    if (autoState == RUNNING) {
+      Serial.println("STOP");
+      autoState = STOPPED;
+    }
+  }
+}
+
 
 void ManualControl() {
   int forward = PS4.R2Value();
   int steering = PS4.LStickX();
 
-  int leftMotorOutput = constrain(map(forward, 0, 255, 90, 150) - map(steering, 0, 255, 30, 150), 30, 150);
-  int rightMotorOutput = constrain(map(forward, 0, 255, 90, 150) + map(steering, 0, 255, 30, 150), 30, 150);
+  int leftMotorOutput = constrain(map(forward, 0, 255, 90, 150) - (map(steering, -127, 127, 30, 150) - 90), 30, 150);
+  int rightMotorOutput = constrain(map(forward, 0, 255, 90, 150) + (map(steering, -127, 127, 30, 150) - 90), 30, 150);
+  //Serial.println(map(steering, -127, 127, 30, 150)-90);
 
   if (leftMotorOutput > 95 || leftMotorOutput < 85) {
     MotorEsquerdo.write(leftMotorOutput);
@@ -98,7 +147,7 @@ void ManualControl() {
   if (rightMotorOutput > 95 || rightMotorOutput < 85) {
     MotorDireito.write(rightMotorOutput);
   } else {
-    MotorDireito.write(90);
+    MotorDireito.write(PS4.R2Value());
   }
 
 
