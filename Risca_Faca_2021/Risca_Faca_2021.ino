@@ -12,6 +12,9 @@
 #define leftMotorPin 25
 #define rightMotorPin 26
 
+#define leftSensorPin 34
+#define rightSensorPin 35
+
 #define irReceiverPin 15
 
 IRrecv irrecv(irReceiverPin);
@@ -64,7 +67,60 @@ void loop() {
   if (PS4.isConnected()) {
     Status_Verify();
   }
+  if (autoState == RUNNING) {
+    int leftSensor = analogRead(leftSensorPin);
+    int rightSensor = analogRead(rightSensorPin);
+    Serial.print(leftSensor);
+    Serial.print(" ");
+    Serial.println(rightSensor);
+
+    if (leftSensor < 3900) {
+      //MotorWrite(90, 90);
+      //delay(200);
+      while (leftSensor < 3900 && autoState == RUNNING) {
+        //Serial.println("SensorEsquerdo");
+        //Serial.println("Ré");
+        MotorWrite(70, 70);
+        Status_Verify();
+        leftSensor = analogRead(leftSensorPin);
+      }
+      delay(250);
+      MotorWrite(80, 100);
+      //Serial.println("MeiaVolta");
+      delay(200);
+    }
+    else if (rightSensor < 3900) {
+      //MotorWrite(90, 90);
+      //delay(200);
+      while (rightSensor < 3900 && autoState == RUNNING) {
+        MotorWrite(70, 70);
+        //Serial.println("SensorDireito");
+        //Serial.println("Ré");
+        Status_Verify();
+        rightSensor = analogRead(rightSensorPin);
+      }
+      delay(250);
+      MotorWrite(100, 80);
+      // Serial.println("MeiaVolta");
+      delay(200);
+    }
+    MotorWrite(120, 120);
+    //Serial.println("Frente");
+    //Serial.print(leftSensor);
+    //Serial.print(" ");
+    //Serial.println(rightSensor);
+    //delay(100);
+  } else {
+    MotorWrite(90, 90);
+  }
 }
+
+void MotorWrite(int ppmDireito, int ppmEsquerdo) {
+  MotorDireito.write(ppmDireito);
+  MotorEsquerdo.write(ppmEsquerdo);
+}
+
+
 
 void Status_Verify() {
   if (PS4.Options()) {
@@ -103,7 +159,6 @@ void Status_Verify() {
 }
 
 void Auto() {
-
   String value;
   if (irrecv.decode(&results))
   {
@@ -112,17 +167,17 @@ void Auto() {
     irrecv.resume();
   }
 
-  if (value == "ffa25d") {
+  if (value == "10") {
     if (autoState == STOPPED) {
       Serial.println("ReadyToGo");
       autoState = READY;
     }
-  } else if (value == "ff629d") {
+  } else if (value == "810") {
     if (autoState == READY) {
       autoState = RUNNING;
       Serial.println("LET'S GO!!!");
     }
-  } else if ( value == "ffe21d") {
+  } else if ( value == "410") {
     if (autoState == RUNNING) {
       Serial.println("STOP");
       autoState = STOPPED;
@@ -135,8 +190,8 @@ void ManualControl() {
   int forward = PS4.R2Value();
   int steering = PS4.LStickX();
 
-  int leftMotorOutput = constrain(map(forward, 0, 255, 90, 150) - (map(steering, -127, 127, 30, 150) - 90), 30, 150);
-  int rightMotorOutput = constrain(map(forward, 0, 255, 90, 150) + (map(steering, -127, 127, 30, 150) - 90), 30, 150);
+  int leftMotorOutput = constrain(map(forward, 0, 255, 90, 150) + (map(steering, -127, 127, 70, 110) - 90), 30, 150);
+  int rightMotorOutput = constrain(map(forward, 0, 255, 90, 150) - (map(steering, -127, 127, 70, 110) - 90), 30, 150);
   //Serial.println(map(steering, -127, 127, 30, 150)-90);
 
   if (leftMotorOutput > 95 || leftMotorOutput < 85) {
