@@ -1,5 +1,3 @@
-
-
 void IRRead() {
   String value;
   if (irrecv.decode(&results))
@@ -11,20 +9,20 @@ void IRRead() {
 
   if (value == "10") {
     if (autoState == STOPPED) {
-      Serial.println("ReadyToGo");
+      //Serial.println("ReadyToGo");
       autoState = READY;
       CalibrateSensors();
     }
   } else if (value == "810") {
     if (autoState == READY) {
       autoState = RUNNING;
-      PS4.setLed(0, 0, 100);
+      PS4.setLed(0, 100, 0);
       PS4.sendToController();
-      Serial.println("LET'S GO!!!");
+      //Serial.println("LET'S GO!!!");
     }
   } else if ( value == "410") {
     if (autoState == RUNNING) {
-      Serial.println("STOP");
+      //Serial.println("STOP");
       autoState = STOPPED;
     }
   }
@@ -47,7 +45,7 @@ void Auto() {
       }
       delay(250);
       MotorWrite(80, 100);
-      delay(200);
+      delay(150);
     }
     else if (rightSensor < rightSensorRef) {
       while (rightSensor < rightSensorRef && autoState == RUNNING) {
@@ -57,7 +55,7 @@ void Auto() {
       }
       delay(250);
       MotorWrite(100, 80);
-      delay(200);
+      delay(150);
     }
     MotorWrite(120, 120);
 
