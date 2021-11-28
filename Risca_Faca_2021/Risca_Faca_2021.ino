@@ -1,38 +1,54 @@
-#include <IRremote.h>
+// Code made by Nick
+// Contact: nicolas_castrosilva@outlook.com
 
+//Servo Libraries
 #include <ESP32Servo.h>
 #include <analogWrite.h>
 #include <ESP32Tone.h>
 #include <ESP32PWM.h>
 
+//PS4 Controller Libraries
 #include <ps4.h>
 #include <PS4Controller.h>
 #include <ps4_int.h>
 
-#define leftMotorPin 25
-#define rightMotorPin 26
-
-#define leftSensorPin 34
-#define rightSensorPin 35
-
-#define irReceiverPin 15
-
-IRrecv irrecv(irReceiverPin);
-
-decode_results results;
-
+//Robot states of operation
 enum robotStates {
   LOCKED, AUTO, MANUAL
 };
+robotStates robotState = LOCKED;
 
+bool optionPressed = false;
+
+
+//IR Remote library and variables
+#include <IRremote.h>
+#define irReceiverPin 15
+IRrecv irrecv(irReceiverPin);
+decode_results results;
+
+//Edge Sensors Pins and Variables
+#define leftSensorPin 34
+#define rightSensorPin 35
+
+int leftSensorRef = 0;
+int rightSensorRef = 0;
+int sensorsTolerance = 100;
+
+//Auto mode states of operation
 enum autoStates {
   STOPPED, READY, RUNNING
 };
-
-robotStates robotState = LOCKED;
-
 autoStates autoState = STOPPED;
-bool optionPressed = false;
+
+//PS4 LED status variables
+unsigned long blinkTimer;
+bool ledOn = true;
+int ledIntensity;
+
+//Define Motors Pins and Instances
+#define leftMotorPin 25
+#define rightMotorPin 26
 
 Servo MotorEsquerdo;
 Servo MotorDireito;
@@ -41,9 +57,9 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
 
-  irrecv.enableIRIn();
+  irrecv.enableIRIn(); //Enable IR Receiver
 
-  PS4.begin("70:77:81:d5:f8:42");
+  PS4.begin("70:77:81:d5:f8:42"); //Start Connection between ESP32 and PS4 Controller
 
   while (!PS4.isConnected()) {
     Serial.println("WatingConnection");
@@ -52,75 +68,24 @@ void setup() {
 
   PS4.setLed(100, 0, 0);
   PS4.sendToController();
-
+  
   MotorEsquerdo.attach(leftMotorPin);
   MotorDireito.attach(rightMotorPin);
   MotorEsquerdo.write(90);
   MotorDireito.write(90);
 
   Serial.println("Ready and LOCKED");
-
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
   if (PS4.isConnected()) {
     Status_Verify();
-  }
-  if (autoState == RUNNING) {
-    int leftSensor = analogRead(leftSensorPin);
-    int rightSensor = analogRead(rightSensorPin);
-    Serial.print(leftSensor);
-    Serial.print(" ");
-    Serial.println(rightSensor);
-
-    if (leftSensor < 3900) {
-      //MotorWrite(90, 90);
-      //delay(200);
-      while (leftSensor < 3900 && autoState == RUNNING) {
-        //Serial.println("SensorEsquerdo");
-        //Serial.println("Ré");
-        MotorWrite(70, 70);
-        Status_Verify();
-        leftSensor = analogRead(leftSensorPin);
-      }
-      delay(250);
-      MotorWrite(80, 100);
-      //Serial.println("MeiaVolta");
-      delay(200);
-    }
-    else if (rightSensor < 3900) {
-      //MotorWrite(90, 90);
-      //delay(200);
-      while (rightSensor < 3900 && autoState == RUNNING) {
-        MotorWrite(70, 70);
-        //Serial.println("SensorDireito");
-        //Serial.println("Ré");
-        Status_Verify();
-        rightSensor = analogRead(rightSensorPin);
-      }
-      delay(250);
-      MotorWrite(100, 80);
-      // Serial.println("MeiaVolta");
-      delay(200);
-    }
-    MotorWrite(120, 120);
-    //Serial.println("Frente");
-    //Serial.print(leftSensor);
-    //Serial.print(" ");
-    //Serial.println(rightSensor);
-    //delay(100);
   } else {
-    MotorWrite(90, 90);
+    MotorEsquerdo.write(90);
+    MotorDireito.write(90);
   }
 }
-
-void MotorWrite(int ppmDireito, int ppmEsquerdo) {
-  MotorDireito.write(ppmDireito);
-  MotorEsquerdo.write(ppmEsquerdo);
-}
-
-
 
 void Status_Verify() {
   if (PS4.Options()) {
@@ -137,6 +102,8 @@ void Status_Verify() {
         robotState = MANUAL;
         PS4.setLed(0, 0, 100);
         PS4.sendToController();
+        MotorEsquerdo.write(90);
+        MotorDireito.write(90);
         Serial.println("MANUAL");
       } else if (robotState == MANUAL) {
         robotState = LOCKED;
@@ -158,57 +125,9 @@ void Status_Verify() {
   }
 }
 
-void Auto() {
-  String value;
-  if (irrecv.decode(&results))
-  {
-    value = String(results.value, HEX);
-    Serial.println(value);
-    irrecv.resume();
-  }
-
-  if (value == "10") {
-    if (autoState == STOPPED) {
-      Serial.println("ReadyToGo");
-      autoState = READY;
-    }
-  } else if (value == "810") {
-    if (autoState == READY) {
-      autoState = RUNNING;
-      Serial.println("LET'S GO!!!");
-    }
-  } else if ( value == "410") {
-    if (autoState == RUNNING) {
-      Serial.println("STOP");
-      autoState = STOPPED;
-    }
-  }
-}
-
-
-void ManualControl() {
-  int forward = PS4.R2Value();
-  int steering = PS4.LStickX();
-
-  int leftMotorOutput = constrain(map(forward, 0, 255, 90, 150) + (map(steering, -127, 127, 70, 110) - 90), 30, 150);
-  int rightMotorOutput = constrain(map(forward, 0, 255, 90, 150) - (map(steering, -127, 127, 70, 110) - 90), 30, 150);
-  //Serial.println(map(steering, -127, 127, 30, 150)-90);
-
-  if (leftMotorOutput > 95 || leftMotorOutput < 85) {
-    MotorEsquerdo.write(leftMotorOutput);
-  } else {
-    MotorEsquerdo.write(90);
-  }
-  if (rightMotorOutput > 95 || rightMotorOutput < 85) {
-    MotorDireito.write(rightMotorOutput);
-  } else {
-    MotorDireito.write(PS4.R2Value());
-  }
-
-
-  Serial.print(rightMotorOutput);
-  Serial.print(" ");
-  Serial.println(leftMotorOutput);
+void MotorWrite(int ppmDireito, int ppmEsquerdo) {
+  MotorDireito.write(ppmDireito);
+  MotorEsquerdo.write(ppmEsquerdo);
 }
 
 
