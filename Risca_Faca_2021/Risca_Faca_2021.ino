@@ -33,7 +33,7 @@ decode_results results;
 
 int leftSensorRef = 0;
 int rightSensorRef = 0;
-int sensorsTolerance = 100;
+int sensorsTolerance = 1500;
 
 //Auto mode states of operation
 enum autoStates {
@@ -107,6 +107,7 @@ void Status_Verify() {
         Serial.println("MANUAL");
       } else if (robotState == MANUAL) {
         robotState = LOCKED;
+        autoState = STOPPED;
         PS4.setLed(100, 0, 0);
         PS4.sendToController();
         MotorEsquerdo.write(90);

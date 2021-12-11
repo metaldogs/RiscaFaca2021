@@ -33,31 +33,38 @@ void Auto() {
   if (autoState == RUNNING) {
     int leftSensor = analogRead(leftSensorPin);
     int rightSensor = analogRead(rightSensorPin);
-    //Serial.print(leftSensor);
-    //Serial.print(" ");
-    //Serial.println(rightSensor);
+    Serial.print(leftSensor);
+    Serial.print(" ");
+    Serial.println(rightSensor);
+
 
     if (leftSensor < leftSensorRef) {
       while (leftSensor < leftSensorRef && autoState == RUNNING) {
         MotorWrite(70, 70);
         leftSensor = analogRead(leftSensorPin);
+        Serial.print(leftSensor);
+        Serial.print(" ");
+        Serial.println(rightSensor);
         IRRead();
       }
-      delay(250);
+      delay(200);
       MotorWrite(80, 100);
-      delay(150);
+      delay(200);
     }
     else if (rightSensor < rightSensorRef) {
       while (rightSensor < rightSensorRef && autoState == RUNNING) {
         MotorWrite(70, 70);
         rightSensor = analogRead(rightSensorPin);
+        Serial.print(leftSensor);
+        Serial.print(" ");
+        Serial.println(rightSensor);
         IRRead();
       }
-      delay(250);
+      delay(200);
       MotorWrite(100, 80);
-      delay(150);
+      delay(200);
     }
-    MotorWrite(120, 120);
+    MotorWrite(110, 110);
 
   } else if (autoState == READY) {
     if (blinkTimer < millis()) {
