@@ -3,20 +3,30 @@ void ManualControl() {
   int steering = PS4.LStickX();
   int backward = PS4.L2Value();
 
+  if (steering < 3 && steering > -3) {
+    steering = 0;
+  }
+
+  if (forward < 3) {
+    forward = 0;
+  }
+
+  if (PS4.Cross()) {
+    forward = 63;
+    if (PS4.Square() ) {
+      forward = 127;
+    }
+  } else if (PS4.Circle()) {
+    forward = -63;
+  }
+
   int leftMotorOutput = constrain(map(forward, 0, 255, 90, 150)  - (map(backward, 0, 255, 0, 60) + (map(steering, -127, 127, 70, 110) - 90)), 30, 150);
   int rightMotorOutput = constrain(map(forward, 0, 255, 90, 150) - (map(backward, 0, 255, 0, 60) - (map(steering, -127, 127, 70, 110) - 90)), 30, 150);
   //Serial.println(map(steering, -127, 127, 30, 150)-90);
 
-  if (leftMotorOutput > 95 || leftMotorOutput < 85) {
-    MotorEsquerdo.write(leftMotorOutput);
-  } else {
-    MotorEsquerdo.write(90);
-  }
-  if (rightMotorOutput > 95 || rightMotorOutput < 85) {
-    MotorDireito.write(rightMotorOutput);
-  } else {
-    MotorDireito.write(PS4.R2Value());
-  }
+  MotorEsquerdo.write(leftMotorOutput);
+  MotorDireito.write(rightMotorOutput);
+
 
 
   Serial.print(rightMotorOutput);

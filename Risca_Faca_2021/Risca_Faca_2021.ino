@@ -33,7 +33,11 @@ decode_results results;
 
 int leftSensorRef = 0;
 int rightSensorRef = 0;
-int sensorsTolerance = 1500;
+int rightSensorTolerance = 500;
+int leftSensorTolerance = 500;
+bool rightReading = true;
+int rightSensor = 0;
+int leftSensor = 0;
 
 //Auto mode states of operation
 enum autoStates {
@@ -47,8 +51,8 @@ bool ledOn = true;
 int ledIntensity;
 
 //Define Motors Pins and Instances
-#define leftMotorPin 25
-#define rightMotorPin 26
+#define leftMotorPin 26
+#define rightMotorPin 25
 
 Servo MotorEsquerdo;
 Servo MotorDireito;
@@ -68,7 +72,7 @@ void setup() {
 
   PS4.setLed(100, 0, 0);
   PS4.sendToController();
-  
+
   MotorEsquerdo.attach(leftMotorPin);
   MotorDireito.attach(rightMotorPin);
   MotorEsquerdo.write(90);
