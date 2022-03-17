@@ -6,7 +6,6 @@ void IRRead() {
     Serial.println(value);
     irrecv.resume();
   }
-
   if (value == "10") {
     if (autoState == STOPPED) {
       //Serial.println("ReadyToGo");
@@ -30,52 +29,71 @@ void IRRead() {
   }
 }
 
+void Star() {
+  rightSensor = analogRead(rightSensorPin);
+  leftSensor = analogRead(leftSensorPin);
+
+  if (digitalRead(middleInfSensor)) {
+    MotorWrite(130, 130);
+  } else if (digitalRead(leftInfSensor)) {
+    MotorWrite(80, 95);
+    delay(100);
+  } else if (digitalRead(rightInfSensor)) {
+    MotorWrite(100, 80);
+    delay(100);
+  }
+
+  if (leftSensor < leftSensorRef && rightSensor < rightSensorRef) {
+    MotorWrite(80, 80);
+    delay(200);
+    MotorWrite(100, 80);
+    delay(200);
+  } else if (leftSensor < leftSensorRef) {
+    MotorWrite(100, 80);
+  } else  if (rightSensor < rightSensorRef) {
+    MotorWrite(80, 95);
+  } else {
+    MotorWrite(110, 110);
+  }
+}
+
+void Radar() {
+  MotorWrite(110, 110);
+  delay(300);
+  bool right = true;
+  while (autoState == RUNNING) {
+    while (!digitalRead(middleInfSensor) && autoState == RUNNING) {
+      IRRead();
+      Status_Verify();
+      if (right) {
+        MotorWrite(80, 110);
+      } else {
+        MotorWrite(110, 80);
+      }
+    }
+    right = !right;
+    while (digitalRead(middleInfSensor) && autoState == RUNNING) {
+      IRRead();
+      Status_Verify();
+      MotorWrite(110, 110);
+    }
+  }
+
+
+
+}
+
 void Auto() {
   IRRead();
+
+  if (PS4.Circle()) tatic = RADAR;
+  if (PS4.Triangle()) tatic = STAR;
+
   if (autoState == RUNNING) {
-    // if (rightReading) {
-    rightSensor = analogRead(rightSensorPin);
-    //} else {
-    leftSensor = analogRead(leftSensorPin);
-    //}
-    //rightReading = !rightReading;
-
-    //Serial.print(0);
-    //Serial.print(" ");
-    //Serial.print(leftSensor);
-    //Serial.print(" ");
-    //Serial.println(rightSensor);
-    if (leftSensor < leftSensorRef && rightSensor < rightSensorRef) {
-      MotorWrite(80, 80);
-      delay(200);
-      MotorWrite(100, 80);
-      delay(200);
-    } else if (leftSensor < leftSensorRef) {
-      MotorWrite(100, 80);
-      //leftSensor = analogRead(leftSensorPin);
-      //        Serial.print(0);
-      //        Serial.print(" ");
-      //        Serial.print(leftSensor);
-      //        Serial.print(" ");
-      //        Serial.println(rightSensor);
-      //Serial.println("Esquerda");
-      //IRRead();
-    } else  if (rightSensor < rightSensorRef) {
-      MotorWrite(80, 95);
-      //rightSensor = analogRead(rightSensorPin);
-      //        Serial.print(0);
-      //        Serial.print(" ");
-      //        Serial.print(leftSensor);
-      //        Serial.print(" ");
-      //        Serial.println(rightSensor);
-      //Serial.println("Direita");
-      //IRRead();
-
-      //delay(200);
-      //MotorWrite(80, 100);
-      //delay(250);
-    } else {
-      MotorWrite(110, 110);
+    if (tatic == STAR) {
+      Star();
+    } else if (tatic == RADAR) {
+      Radar();
     }
 
 
@@ -109,7 +127,6 @@ void Auto() {
     }
   }
 }
-
 void CalibrateSensors() {
   leftSensorRef = analogRead(leftSensorPin) - leftSensorTolerance;
   rightSensorRef = analogRead(rightSensorPin) - rightSensorTolerance;

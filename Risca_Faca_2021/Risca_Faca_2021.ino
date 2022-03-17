@@ -20,7 +20,6 @@ robotStates robotState = LOCKED;
 
 bool optionPressed = false;
 
-
 //IR Remote library and variables
 #include <IRremote.h>
 #define irReceiverPin 15
@@ -39,11 +38,22 @@ bool rightReading = true;
 int rightSensor = 0;
 int leftSensor = 0;
 
+//Presence Sensor Pins and Variables
+
+#define rightInfSensor 5//17
+#define middleInfSensor 19//18
+#define leftInfSensor 22 //23
+
 //Auto mode states of operation
 enum autoStates {
   STOPPED, READY, RUNNING
 };
 autoStates autoState = STOPPED;
+
+enum tatics {
+  STAR, RADAR
+};
+tatics tatic = STAR;
 
 //PS4 LED status variables
 unsigned long blinkTimer;
@@ -63,12 +73,16 @@ void setup() {
 
   irrecv.enableIRIn(); //Enable IR Receiver
 
-  PS4.begin("70:77:81:d5:f8:42"); //Start Connection between ESP32 and PS4 Controller
+  //PS4.begin("70:77:81:d5:f8:42"); //Start Connection between ESP32 and PS4 Controller
 
-  while (!PS4.isConnected()) {
-    Serial.println("WatingConnection");
-    delay(250);
-  }
+  //while (!PS4.isConnected()) {
+  //  Serial.println("WatingConnection");
+  //  delay(250);
+  // }
+
+  pinMode(leftInfSensor, INPUT);
+  pinMode(middleInfSensor, INPUT);
+  pinMode(rightInfSensor, INPUT);
 
   PS4.setLed(100, 0, 0);
   PS4.sendToController();
@@ -82,6 +96,8 @@ void setup() {
 }
 
 void loop() {
+
+  //sensorTest();
   // put your main code here, to run repeatedly:
   if (PS4.isConnected()) {
     Status_Verify();
@@ -89,6 +105,20 @@ void loop() {
     MotorEsquerdo.write(90);
     MotorDireito.write(90);
   }
+}
+
+void sensorTest() {
+  //Serial.println("TestintSensors");
+  if (digitalRead(leftInfSensor)) {
+    Serial.println("Left");
+  }
+  if (digitalRead(middleInfSensor)) {
+    Serial.println("Middle");
+  }
+  if (digitalRead(rightInfSensor)) {
+    Serial.println("Right");
+  }
+
 }
 
 void Status_Verify() {
@@ -102,13 +132,16 @@ void Status_Verify() {
         MotorEsquerdo.write(90);
         MotorDireito.write(90);
         Serial.println("AUTO");
+        
       } else if (robotState == AUTO) {
         robotState = MANUAL;
         PS4.setLed(0, 0, 100);
         PS4.sendToController();
         MotorEsquerdo.write(90);
         MotorDireito.write(90);
+        autoState = STOPPED;
         Serial.println("MANUAL");
+
       } else if (robotState == MANUAL) {
         robotState = LOCKED;
         autoState = STOPPED;
