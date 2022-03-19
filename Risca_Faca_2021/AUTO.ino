@@ -30,6 +30,7 @@ void IRRead() {
 }
 
 void Star() {
+
   rightSensor = analogRead(rightSensorPin);
   leftSensor = analogRead(leftSensorPin);
 
@@ -44,6 +45,7 @@ void Star() {
   }
 
   if (leftSensor < leftSensorRef && rightSensor < rightSensorRef) {
+
     MotorWrite(80, 80);
     delay(200);
     MotorWrite(100, 80);
@@ -58,13 +60,19 @@ void Star() {
 }
 
 void Radar() {
-  MotorWrite(110, 110);
-  delay(300);
+  Serial.println("StarStart");
+  unsigned int timerStart = millis() + 200;
+  while (timerStart > millis()) {
+    MotorWrite(120, 120);
+  }
+
+  delay(100);
   bool right = true;
   while (autoState == RUNNING) {
     while (!digitalRead(middleInfSensor) && autoState == RUNNING) {
+      //Serial.println("NotFind");
       IRRead();
-      Status_Verify();
+      //Status_Verify();
       if (right) {
         MotorWrite(80, 110);
       } else {
@@ -73,21 +81,24 @@ void Radar() {
     }
     right = !right;
     while (digitalRead(middleInfSensor) && autoState == RUNNING) {
+      //Serial.println("Find");
       IRRead();
-      Status_Verify();
+      //Status_Verify();
       MotorWrite(110, 110);
     }
   }
-
-
-
 }
 
 void Auto() {
   IRRead();
-
-  if (PS4.Circle()) tatic = RADAR;
-  if (PS4.Triangle()) tatic = STAR;
+  if (PS4.Circle()) {
+    Serial.println("RadarMode");
+    tatic = RADAR;
+  }
+  if (PS4.Triangle()) {
+    Serial.println("StarMode");
+    tatic = STAR;
+  }
 
   if (autoState == RUNNING) {
     if (tatic == STAR) {
@@ -95,7 +106,6 @@ void Auto() {
     } else if (tatic == RADAR) {
       Radar();
     }
-
 
   } else if (autoState == READY) {
     MotorWrite(90, 90);

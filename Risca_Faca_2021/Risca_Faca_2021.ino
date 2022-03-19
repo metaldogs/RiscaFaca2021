@@ -53,7 +53,7 @@ autoStates autoState = STOPPED;
 enum tatics {
   STAR, RADAR
 };
-tatics tatic = STAR;
+tatics tatic = RADAR;
 
 //PS4 LED status variables
 unsigned long blinkTimer;
@@ -74,11 +74,12 @@ void setup() {
   irrecv.enableIRIn(); //Enable IR Receiver
 
   //PS4.begin("70:77:81:d5:f8:42"); //Start Connection between ESP32 and PS4 Controller
-
-  //while (!PS4.isConnected()) {
-  //  Serial.println("WatingConnection");
-  //  delay(250);
-  // }
+  //PS4.begin("60:5b:b4:56:c5:fa");
+  PS4.begin("a8:47:4a:ed:40:64");
+  while (!PS4.isConnected()) {
+    Serial.println("WatingConnection");
+    delay(250);
+  }
 
   pinMode(leftInfSensor, INPUT);
   pinMode(middleInfSensor, INPUT);
@@ -132,7 +133,7 @@ void Status_Verify() {
         MotorEsquerdo.write(90);
         MotorDireito.write(90);
         Serial.println("AUTO");
-        
+
       } else if (robotState == AUTO) {
         robotState = MANUAL;
         PS4.setLed(0, 0, 100);

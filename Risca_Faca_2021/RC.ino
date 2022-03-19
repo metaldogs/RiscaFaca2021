@@ -3,11 +3,11 @@ void ManualControl() {
   int steering = PS4.LStickX();
   int backward = PS4.L2Value();
 
-  if (steering < 3 && steering > -3) {
+  if (steering < 10 && steering > -10) {
     steering = 0;
   }
 
-  if (forward < 3) {
+  if (forward < 10) {
     forward = 0;
   }
 
