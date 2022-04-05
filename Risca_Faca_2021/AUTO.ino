@@ -60,23 +60,24 @@ void Star() {
 }
 
 void Radar() {
-  Serial.println("StarStart");
-  unsigned int timerStart = millis() + 200;
-  while (timerStart > millis()) {
-    MotorWrite(120, 120);
+  //Serial.println("StarStart");
+  if (!desempate) {
+    unsigned int timerStart = millis() + 300;
+    while (timerStart > millis()) {
+      MotorWrite(120, 120);
+    }
   }
 
-  delay(100);
-  bool right = true;
+ 
   while (autoState == RUNNING) {
     while (!digitalRead(middleInfSensor) && autoState == RUNNING) {
       //Serial.println("NotFind");
       IRRead();
       //Status_Verify();
       if (right) {
-        MotorWrite(80, 110);
+        MotorWrite(95, 110);
       } else {
-        MotorWrite(110, 80);
+        MotorWrite(110, 95);
       }
     }
     right = !right;
@@ -84,7 +85,7 @@ void Radar() {
       //Serial.println("Find");
       IRRead();
       //Status_Verify();
-      MotorWrite(110, 110);
+      MotorWrite(150, 150);
     }
   }
 }
@@ -98,6 +99,22 @@ void Auto() {
   if (PS4.Triangle()) {
     Serial.println("StarMode");
     tatic = STAR;
+  }
+  if (PS4.Right()) {
+    Serial.println("Right");
+    right = true;
+  }
+  if (PS4.Left()) {
+    Serial.println("Left");
+    right = false;
+  }
+  if (PS4.Up()) {
+    Serial.println("Up");
+    desempate = false;
+  }
+  if (PS4.Down()) {
+    Serial.println("Down");
+    desempate = true;
   }
 
   if (autoState == RUNNING) {

@@ -17,6 +17,8 @@ enum robotStates {
   LOCKED, AUTO, MANUAL
 };
 robotStates robotState = LOCKED;
+bool right = true;
+bool desempate = false;
 
 bool optionPressed = false;
 
