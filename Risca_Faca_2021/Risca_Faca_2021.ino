@@ -32,18 +32,17 @@ decode_results results;
 //#define leftSensorPin 34
 //#define rightSensorPin 35
 
-int leftSensorRef = 0;
-int rightSensorRef = 0;
-int rightSensorTolerance = 500;
-int leftSensorTolerance = 500;
-bool rightReading = true;
-int rightSensor = 0;
-int leftSensor = 0;
+//int leftSensorRef = 0;
+//int rightSensorRef = 0;
+//int rightSensorTolerance = 500;
+//int leftSensorTolerance = 500;
+//bool rightReading = true;
+//int rightSensor = 0;
+//int leftSensor = 0;
 
 //Presence Sensor Pins and Variables
-
-#define rightInfSensor 5//17
 //#define middleInfSensor 19//18
+#define rightInfSensor 5//17
 #define leftInfSensor 22 //23
 
 //Auto mode states of operation
