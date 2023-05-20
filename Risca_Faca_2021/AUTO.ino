@@ -11,7 +11,7 @@ void IRRead() {
       //Serial.println("ReadyToGo");
       autoState = READY;
       MotorWrite(90, 90);
-      CalibrateSensors();
+      //CalibrateSensors();
     }
   } else if (value == "810") {
     if (autoState == READY) {
@@ -28,7 +28,7 @@ void IRRead() {
     }
   }
 }
-
+/*
 void Star() {
 
   rightSensor = analogRead(rightSensorPin);
@@ -57,7 +57,7 @@ void Star() {
   } else {
     MotorWrite(110, 110);
   }
-}
+}*/
 
 void Radar() {
   //Serial.println("StarStart");
@@ -70,7 +70,7 @@ void Radar() {
 
  
   while (autoState == RUNNING) {
-    while (!digitalRead(middleInfSensor) && autoState == RUNNING) {
+    while ((!digitalRead(rightInfSensor) || !digitalRead(leftInfSensor)) && autoState == RUNNING) {
       //Serial.println("NotFind");
       IRRead();
       //Status_Verify();
@@ -81,7 +81,7 @@ void Radar() {
       }
     }
     right = !right;
-    while (digitalRead(middleInfSensor) && autoState == RUNNING) {
+    while ((!digitalRead(rightInfSensor) || !digitalRead(leftInfSensor)) && autoState == RUNNING) {
       //Serial.println("Find");
       IRRead();
       //Status_Verify();
@@ -96,10 +96,10 @@ void Auto() {
     Serial.println("RadarMode");
     tatic = RADAR;
   }
-  if (PS4.Triangle()) {
+  /*if (PS4.Triangle()) {
     Serial.println("StarMode");
     tatic = STAR;
-  }
+  }*/
   if (PS4.Right()) {
     Serial.println("Right");
     right = true;
@@ -118,11 +118,11 @@ void Auto() {
   }
 
   if (autoState == RUNNING) {
-    if (tatic == STAR) {
-      Star();
-    } else if (tatic == RADAR) {
+    //if (tatic == STAR) {
+  //    Star();
+   // } else if (tatic == RADAR) {
       Radar();
-    }
+ //   }
 
   } else if (autoState == READY) {
     MotorWrite(90, 90);
@@ -154,7 +154,8 @@ void Auto() {
     }
   }
 }
+/*
 void CalibrateSensors() {
   leftSensorRef = analogRead(leftSensorPin) - leftSensorTolerance;
   rightSensorRef = analogRead(rightSensorPin) - rightSensorTolerance;
-}
+}*/

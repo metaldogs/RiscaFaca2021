@@ -29,8 +29,8 @@ IRrecv irrecv(irReceiverPin);
 decode_results results;
 
 //Edge Sensors Pins and Variables
-#define leftSensorPin 34
-#define rightSensorPin 35
+//#define leftSensorPin 34
+//#define rightSensorPin 35
 
 int leftSensorRef = 0;
 int rightSensorRef = 0;
@@ -43,7 +43,7 @@ int leftSensor = 0;
 //Presence Sensor Pins and Variables
 
 #define rightInfSensor 5//17
-#define middleInfSensor 19//18
+//#define middleInfSensor 19//18
 #define leftInfSensor 22 //23
 
 //Auto mode states of operation
@@ -53,7 +53,7 @@ enum autoStates {
 autoStates autoState = STOPPED;
 
 enum tatics {
-  STAR, RADAR
+   RADAR//,STAR
 };
 tatics tatic = RADAR;
 
@@ -84,7 +84,7 @@ void setup() {
   }
 
   pinMode(leftInfSensor, INPUT);
-  pinMode(middleInfSensor, INPUT);
+  //pinMode(middleInfSensor, INPUT);
   pinMode(rightInfSensor, INPUT);
 
   PS4.setLed(100, 0, 0);
@@ -115,9 +115,9 @@ void sensorTest() {
   if (digitalRead(leftInfSensor)) {
     Serial.println("Left");
   }
-  if (digitalRead(middleInfSensor)) {
-    Serial.println("Middle");
-  }
+  //if (digitalRead(middleInfSensor)) {
+  //  Serial.println("Middle");
+ // }
   if (digitalRead(rightInfSensor)) {
     Serial.println("Right");
   }
