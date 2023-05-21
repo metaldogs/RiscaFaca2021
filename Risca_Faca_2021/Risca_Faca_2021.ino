@@ -76,7 +76,8 @@ void setup() {
 
   //PS4.begin("70:77:81:d5:f8:42"); //Start Connection between ESP32 and PS4 Controller
   //PS4.begin("60:5b:b4:56:c5:fa");
-  PS4.begin("a8:47:4a:ed:40:64");
+  PS4.begin("44:1c:a8:c6:41:74");
+  //PS4.begin("a8:47:4a:ed:40:64");//
   while (!PS4.isConnected()) {
     Serial.println("WatingConnection");
     delay(250);
