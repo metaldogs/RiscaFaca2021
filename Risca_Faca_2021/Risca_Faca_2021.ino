@@ -24,13 +24,13 @@ bool optionPressed = false;
 
 //IR Remote library and variables
 #include <IRremote.h>
-#define irReceiverPin 15
+#define irReceiverPin 23
 IRrecv irrecv(irReceiverPin);
 decode_results results;
 
 //Edge Sensors Pins and Variables
-//#define leftSensorPin 34
-//#define rightSensorPin 35
+//#define leftSensorPin 27
+//#define rightSensorPin 26
 
 //int leftSensorRef = 0;
 //int rightSensorRef = 0;
@@ -42,8 +42,8 @@ decode_results results;
 
 //Presence Sensor Pins and Variables
 //#define middleInfSensor 19//18
-#define rightInfSensor 5//17
-#define leftInfSensor 22 //23
+#define rightInfSensor 19//17 5
+#define leftInfSensor 18 //23 22 
 
 //Auto mode states of operation
 enum autoStates {
@@ -62,8 +62,8 @@ bool ledOn = true;
 int ledIntensity;
 
 //Define Motors Pins and Instances
-#define leftMotorPin 26
-#define rightMotorPin 25
+#define leftMotorPin 34
+#define rightMotorPin 35
 
 Servo MotorEsquerdo;
 Servo MotorDireito;
