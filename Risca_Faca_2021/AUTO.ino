@@ -70,7 +70,7 @@ void Radar() {
 
  
   while (autoState == RUNNING) {
-    while ((!digitalRead(rightInfSensor) || !digitalRead(leftInfSensor)) && autoState == RUNNING) {
+    while ((!digitalRead(rightInfSensor) && !digitalRead(leftInfSensor)) && autoState == RUNNING) {
       //Serial.println("NotFind");
       IRRead();
       //Status_Verify();
@@ -81,7 +81,7 @@ void Radar() {
       }
     }
     right = !right;
-    while ((!digitalRead(rightInfSensor) || !digitalRead(leftInfSensor)) && autoState == RUNNING) {
+    while ((digitalRead(rightInfSensor) || digitalRead(leftInfSensor)) && autoState == RUNNING) {
       //Serial.println("Find");
       IRRead();
       //Status_Verify();

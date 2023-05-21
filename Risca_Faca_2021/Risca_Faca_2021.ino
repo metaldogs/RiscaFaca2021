@@ -1,11 +1,9 @@
+#include <ESP32Servo.h>
+
 // Code made by Nick
 // Contact: nicolas_castrosilva@outlook.com
 
 //Servo Libraries
-#include <ESP32Servo.h>
-#include <analogWrite.h>
-#include <ESP32Tone.h>
-#include <ESP32PWM.h>
 
 //PS4 Controller Libraries
 #include <ps4.h>
@@ -42,8 +40,8 @@ decode_results results;
 
 //Presence Sensor Pins and Variables
 //#define middleInfSensor 19//18
-#define rightInfSensor 19//17 5
-#define leftInfSensor 18 //23 22 
+#define rightInfSensor 16//17 5
+#define leftInfSensor 17 //23 22 
 
 //Auto mode states of operation
 enum autoStates {
@@ -62,8 +60,8 @@ bool ledOn = true;
 int ledIntensity;
 
 //Define Motors Pins and Instances
-#define leftMotorPin 34
-#define rightMotorPin 35
+#define leftMotorPin 27
+#define rightMotorPin 26
 
 Servo MotorEsquerdo;
 Servo MotorDireito;
